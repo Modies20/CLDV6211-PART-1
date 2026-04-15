@@ -1,0 +1,45 @@
+﻿@model IEnumerable<EventEase.Models.Venue>
+
+@{
+    ViewData["Title"] = "Venues";
+}
+
+<h1>Venues</h1>
+<p class="text-muted">Manage all available venues in the system</p>
+
+<p>
+    <a asp-action="Create" class="btn btn-primary">
+        <i class="bi bi-plus-circle"></i> Create New Venue
+    </a>
+</p>
+
+<div class="row">
+    @foreach (var item in Model)
+    {
+        <div class="col-md-4 mb-4">
+            <div class="card h-100 shadow-sm">
+                <img src="@item.ImageURL" class="card-img-top" alt="@item.VenueName" style="height: 200px; object-fit: cover;">
+                <div class="card-body">
+                    <h5 class="card-title">@item.VenueName</h5>
+                    <p class="card-text">
+                        <strong>Location:</strong> @item.VenueLocation<br />
+                        <strong>Capacity:</strong> @item.Capacity people
+                    </p>
+                </div>
+                <div class="card-footer bg-transparent">
+                    <a asp-action="Edit" asp-route-id="@item.VenueId" class="btn btn-sm btn-warning">Edit</a>
+                    <a asp-action="Details" asp-route-id="@item.VenueId" class="btn btn-sm btn-info">Details</a>
+                    <a asp-action="Delete" asp-route-id="@item.VenueId" class="btn btn-sm btn-danger">Delete</a>
+                </div>
+            </div>
+        </div>
+    }
+</div>
+
+@if (!Model.Any())
+{
+    <div class="alert alert-info text-center">
+        <h4>No venues found</h4>
+        <p>Click "Create New Venue" to add your first venue.</p>
+    </div>
+}

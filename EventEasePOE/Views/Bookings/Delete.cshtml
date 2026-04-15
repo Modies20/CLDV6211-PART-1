@@ -1,0 +1,49 @@
+﻿@model EventEase.Models.Booking
+
+@{
+    ViewData["Title"] = "Cancel Booking";
+}
+
+<h1>Cancel Booking</h1>
+<div class="alert alert-warning">
+    <strong>Warning!</strong> Are you sure you want to cancel this booking?
+</div>
+
+<div class="row">
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header bg-warning">
+                <h4>Booking #@Model.BookingId</h4>
+            </div>
+            <div class="card-body">
+                <dl class="row">
+                    <dt class="col-sm-4">Event</dt>
+                    <dd class="col-sm-8">@Model.Event?.EventName</dd>
+
+                    <dt class="col-sm-4">Venue</dt>
+                    <dd class="col-sm-8">@Model.Venue?.VenueName</dd>
+
+                    <dt class="col-sm-4">Start Time</dt>
+                    <dd class="col-sm-8">@Model.StartDateTime.ToString("MMMM dd, yyyy hh:mm tt")</dd>
+
+                    <dt class="col-sm-4">End Time</dt>
+                    <dd class="col-sm-8">@Model.EndDateTime.ToString("MMMM dd, yyyy hh:mm tt")</dd>
+
+                    <dt class="col-sm-4">Customer</dt>
+                    <dd class="col-sm-8">@Model.CustomerName</dd>
+
+                    <dt class="col-sm-4">Status</dt>
+                    <dd class="col-sm-8">
+                        <span class="badge bg-@(Model.BookingStatus == "Confirmed" ? "success" : "danger")">@Model.BookingStatus</span>
+                    </dd>
+                </dl>
+
+                <form asp-action="Delete">
+                    <input type="hidden" asp-for="BookingId" />
+                    <input type="submit" value="Confirm Cancellation" class="btn btn-danger" />
+                    <a asp-action="Index" class="btn btn-secondary">Back to List</a>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>

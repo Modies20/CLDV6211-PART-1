@@ -1,0 +1,65 @@
+﻿@model EventEase.Models.Booking
+
+@{
+    ViewData["Title"] = "Booking Details";
+}
+
+<h1>Booking Details</h1>
+
+<div class="row">
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header bg-info text-white">
+                <h4>Booking #@Model.BookingId</h4>
+            </div>
+            <div class="card-body">
+                <dl class="row">
+                    <dt class="col-sm-4">Booking ID</dt>
+                    <dd class="col-sm-8">@Model.BookingId</dd>
+
+                    <dt class="col-sm-4">Event</dt>
+                    <dd class="col-sm-8">@Model.Event?.EventName</dd>
+
+                    <dt class="col-sm-4">Event Date</dt>
+                    <dd class="col-sm-8">@Model.Event?.EventDate.ToString("MMMM dd, yyyy")</dd>
+
+                    <dt class="col-sm-4">Venue</dt>
+                    <dd class="col-sm-8">@Model.Venue?.VenueName</dd>
+
+                    <dt class="col-sm-4">Venue Location</dt>
+                    <dd class="col-sm-8">@Model.Venue?.VenueLocation</dd>
+
+                    <dt class="col-sm-4">Start Time</dt>
+                    <dd class="col-sm-8">@Model.StartDateTime.ToString("MMMM dd, yyyy hh:mm tt")</dd>
+
+                    <dt class="col-sm-4">End Time</dt>
+                    <dd class="col-sm-8">@Model.EndDateTime.ToString("MMMM dd, yyyy hh:mm tt")</dd>
+
+                    <dt class="col-sm-4">Duration</dt>
+                    <dd class="col-sm-8">@((Model.EndDateTime - Model.StartDateTime).TotalHours) hours</dd>
+
+                    <dt class="col-sm-4">Customer Name</dt>
+                    <dd class="col-sm-8">@Model.CustomerName</dd>
+
+                    <dt class="col-sm-4">Customer Email</dt>
+                    <dd class="col-sm-8">@(string.IsNullOrEmpty(Model.CustomerEmail) ? "Not provided" : Model.CustomerEmail)</dd>
+
+                    <dt class="col-sm-4">Booking Date</dt>
+                    <dd class="col-sm-8">@Model.BookingDate.ToString("MMMM dd, yyyy")</dd>
+
+                    <dt class="col-sm-4">Status</dt>
+                    <dd class="col-sm-8">
+                        <span class="badge bg-@(Model.BookingStatus == "Confirmed" ? "success" : Model.BookingStatus == "Cancelled" ? "danger" : "warning")">
+                            @Model.BookingStatus
+                        </span>
+                    </dd>
+                </dl>
+            </div>
+            <div class="card-footer">
+                <a asp-action="Edit" asp-route-id="@Model.BookingId" class="btn btn-warning">Edit</a>
+                <a asp-action="Delete" asp-route-id="@Model.BookingId" class="btn btn-danger">Cancel Booking</a>
+                <a asp-action="Index" class="btn btn-secondary">Back to List</a>
+            </div>
+        </div>
+    </div>
+</div>

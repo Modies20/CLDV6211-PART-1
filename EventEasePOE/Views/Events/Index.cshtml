@@ -1,0 +1,43 @@
+﻿@model IEnumerable<EventEase.Models.Event>
+
+@{
+    ViewData["Title"] = "Events";
+}
+
+<h1>Events</h1>
+<p class="text-muted">Manage all events in the system</p>
+
+<p>
+    <a asp-action="Create" class="btn btn-primary">Create New Event</a>
+</p>
+
+<div class="row">
+    @foreach (var item in Model)
+    {
+        <div class="col-md-4 mb-4">
+            <div class="card h-100 shadow-sm">
+                <img src="@item.ImageURL" class="card-img-top" alt="@item.EventName" style="height: 200px; object-fit: cover;" onerror="this.src='https://picsum.photos/id/0/400/200'">
+                <div class="card-body">
+                    <h5 class="card-title">@item.EventName</h5>
+                    <p class="card-text">
+                        <strong>Date:</strong> @item.EventDate.ToString("MMMM dd, yyyy")<br />
+                        <strong>Description:</strong> @(item.EventDescription.Length > 100 ? item.EventDescription.Substring(0, 100) + "..." : item.EventDescription)
+                    </p>
+                </div>
+                <div class="card-footer bg-transparent">
+                    <a asp-action="Edit" asp-route-id="@item.EventId" class="btn btn-sm btn-warning">Edit</a>
+                    <a asp-action="Details" asp-route-id="@item.EventId" class="btn btn-sm btn-info">Details</a>
+                    <a asp-action="Delete" asp-route-id="@item.EventId" class="btn btn-sm btn-danger">Delete</a>
+                </div>
+            </div>
+        </div>
+    }
+</div>
+
+@if (!Model.Any())
+{
+    <div class="alert alert-info text-center">
+        <h4>No events found</h4>
+        <p>Click "Create New Event" to add your first event.</p>
+    </div>
+}

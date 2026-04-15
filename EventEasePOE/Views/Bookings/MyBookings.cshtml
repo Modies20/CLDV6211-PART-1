@@ -1,0 +1,61 @@
+﻿@model IEnumerable<EventEase.Models.Booking>
+
+@{
+    ViewData["Title"] = "Search Bookings";
+}
+
+<h1>Search Bookings by Customer</h1>
+
+<div class="row mb-4">
+    <div class="col-md-6">
+        <form asp-action="MyBookings" method="get" class="input-group">
+            <input type="text" name="searchName" class="form-control" placeholder="Enter customer name..." value="@ViewBag.SearchName" />
+            <button type="submit" class="btn btn-primary">Search</button>
+            <a asp-action="MyBookings" class="btn btn-secondary">Clear</a>
+        </form>
+    </div>
+</div>
+
+@if (!string.IsNullOrEmpty(ViewBag.SearchName))
+{
+    <p>Showing results for: <strong>@ViewBag.SearchName</strong></p>
+}
+
+<div class="table-responsive">
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>Booking ID</th>
+                <th>Event</th>
+                <th>Venue</th>
+                <th>Date</th>
+                <th>Customer</th>
+                <th>Status</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in Model)
+            {
+                <tr>
+                    <td>@item.BookingId</td>
+                    <td>@item.Event?.EventName</td>
+                    <td>@item.Venue?.VenueName</td>
+                    <td>@item.StartDateTime.ToString("MMM dd, yyyy")</td>
+                    <td>@item.CustomerName</td>
+                    <td>@item.BookingStatus</td>
+                    <td>
+                        <a asp-action="Details" asp-route-id="@item.BookingId" class="btn btn-sm btn-info">Details</a>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>
+
+@if (!Model.Any() && !string.IsNullOrEmpty(ViewBag.SearchName))
+{
+    <div class="alert alert-warning">
+        No bookings found for "@ViewBag.SearchName"
+    </div>
+}

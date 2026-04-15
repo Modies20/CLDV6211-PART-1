@@ -1,0 +1,47 @@
+﻿@model IEnumerable<EventEase.Models.Booking>
+
+@{
+    ViewData["Title"] = "Booking Calendar";
+    var groupedBookings = Model.GroupBy(b => b.StartDateTime.ToString("MMMM yyyy"));
+}
+
+<h1>Booking Calendar</h1>
+<p class="text-muted">Visual overview of all bookings</p>
+
+@foreach (var monthGroup in groupedBookings.OrderBy(g => DateTime.Parse(g.Key)))
+{
+    <div class="card mb-4">
+        <div class="card-header bg-primary text-white">
+            <h4>@monthGroup.Key</h4>
+        </div>
+        <div class="card-body">
+            <div class="row">
+                @foreach (var booking in monthGroup.OrderBy(b => b.StartDateTime))
+                {
+                    <div class="col-md-4 mb-3">
+                        <div class="card @(booking.StartDateTime < DateTime.Now ? "border-secondary" : "border-success")">
+                            <div class="card-body">
+                                <h6 class="card-title">
+                                    <strong>@booking.StartDateTime.ToString("MMM dd")</strong> - @booking.Event?.EventName
+                                </h6>
+                                <p class="card-text small">
+                                    <strong>Venue:</strong> @booking.Venue?.VenueName<br />
+                                    <strong>Time:</strong> @booking.StartDateTime.ToString("hh:mm tt") - @booking.EndDateTime.ToString("hh:mm tt")<br />
+                                    <strong>Customer:</strong> @booking.CustomerName
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+}
+
+@if (!Model.Any())
+{
+    <div class="alert alert-info text-center">
+        <h4>No bookings found</h4>
+        <p>Create a booking to see it on the calendar.</p>
+    </div>
+}
