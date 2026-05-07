@@ -9,7 +9,7 @@
 
 <div class="row">
     <div class="col-md-6">
-        <form asp-action="Create">
+        <form asp-action="Create" enctype="multipart/form-data">
             <div asp-validation-summary="ModelOnly" class="text-danger"></div>
 
             <div class="form-group mb-3">
@@ -31,10 +31,10 @@
             </div>
 
             <div class="form-group mb-3">
-                <label asp-for="ImageURL" class="control-label"></label>
-                <input asp-for="ImageURL" class="form-control" placeholder="https://picsum.photos/id/0/400/300" />
-                <small class="form-text text-muted">Enter a URL for the event image</small>
-                <span asp-validation-for="ImageURL" class="text-danger"></span>
+                <label asp-for="ImageFile" class="control-label"></label>
+                <input asp-for="ImageFile" type="file" class="form-control" accept="image/*" />
+                <span asp-validation-for="ImageFile" class="text-danger"></span>
+                <small class="form-text text-muted">Upload an event image (jpg, png, gif). Max 5MB.</small>
             </div>
 
             <div class="form-group">
@@ -44,12 +44,13 @@
         </form>
     </div>
     <div class="col-md-6">
-        <div class="card">
-            <div class="card-header">
-                <strong>Preview</strong>
+        <div class="card bg-light">
+            <div class="card-header bg-info text-white">
+                <strong>Image Preview</strong>
             </div>
             <div class="card-body text-center">
-                <img id="imagePreview" src="https://picsum.photos/id/0/300/200" class="img-fluid rounded" style="max-height: 200px;" />
+                <img id="imagePreview" src="https://placehold.co/600x400?text=No+Image+Selected" class="img-fluid rounded" style="max-height: 200px;" />
+                <p class="mt-2 text-muted">Selected image will appear here</p>
             </div>
         </div>
     </div>
@@ -60,12 +61,16 @@
         await Html.RenderPartialAsync("_ValidationScriptsPartial");
     }
     <script>
-        document.getElementById('ImageURL').addEventListener('input', function() {
-            var preview = document.getElementById('imagePreview');
-            if (this.value) {
-                preview.src = this.value;
+        document.getElementById('ImageFile').addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(ev) {
+                    document.getElementById('imagePreview').src = ev.target.result;
+                }
+                reader.readAsDataURL(file);
             } else {
-                preview.src = 'https://picsum.photos/id/0/300/200';
+                document.getElementById('imagePreview').src = 'https://placehold.co/600x400?text=No+Image+Selected';
             }
         });
     </script>

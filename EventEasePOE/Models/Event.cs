@@ -9,25 +9,25 @@ namespace EventEase.Models
         public int EventId { get; set; }
 
         [Required(ErrorMessage = "Event name is required")]
-        [Display(Name = "Event Name")]
         [StringLength(255)]
+        [Display(Name = "Event Name")]
         public string EventName { get; set; } = string.Empty;
 
         [Required(ErrorMessage = "Event date is required")]
-        [Display(Name = "Event Date")]
         [DataType(DataType.Date)]
+        [Display(Name = "Event Date")]
         public DateTime EventDate { get; set; }
 
-        [Required(ErrorMessage = "Event description is required")]
+        [Required(ErrorMessage = "Description is required")]
         [Display(Name = "Description")]
-        [DataType(DataType.MultilineText)]
         public string EventDescription { get; set; } = string.Empty;
 
-        [Display(Name = "Event Image")]
-        [StringLength(500)]
-        public string? ImageURL { get; set; }
+        public string? ImageUrl { get; set; }
 
-        // Navigation property
+        [NotMapped]
+        [Display(Name = "Event Image")]
+        public IFormFile? ImageFile { get; set; }
+
         public virtual ICollection<Booking>? Bookings { get; set; }
     }
 }

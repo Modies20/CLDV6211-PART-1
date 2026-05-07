@@ -8,9 +8,7 @@
 <p class="text-muted">Manage all available venues in the system</p>
 
 <p>
-    <a asp-action="Create" class="btn btn-primary">
-        <i class="bi bi-plus-circle"></i> Create New Venue
-    </a>
+    <a asp-action="Create" class="btn btn-primary">Create New Venue</a>
 </p>
 
 <div class="row">
@@ -18,7 +16,7 @@
     {
         <div class="col-md-4 mb-4">
             <div class="card h-100 shadow-sm">
-                <img src="@item.ImageURL" class="card-img-top" alt="@item.VenueName" style="height: 200px; object-fit: cover;">
+                <img src="@item.ImageURL" class="card-img-top" alt="@item.VenueName" style="height: 200px; object-fit: cover;" onerror="this.src='https://placehold.co/600x400?text=No+Image'">
                 <div class="card-body">
                     <h5 class="card-title">@item.VenueName</h5>
                     <p class="card-text">

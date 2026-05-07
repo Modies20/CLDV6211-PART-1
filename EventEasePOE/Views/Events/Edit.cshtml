@@ -9,9 +9,10 @@
 
 <div class="row">
     <div class="col-md-6">
-        <form asp-action="Edit">
+        <form asp-action="Edit" enctype="multipart/form-data">
             <div asp-validation-summary="ModelOnly" class="text-danger"></div>
             <input type="hidden" asp-for="EventId" />
+            <input type="hidden" asp-for="ImageUrl" />
 
             <div class="form-group mb-3">
                 <label asp-for="EventName" class="control-label"></label>
@@ -31,10 +32,19 @@
                 <span asp-validation-for="EventDescription" class="text-danger"></span>
             </div>
 
+            @if (!string.IsNullOrEmpty(Model.ImageUrl))
+            {
+                <div class="mb-3">
+                    <label>Current Image</label><br />
+                    <img src="@Model.ImageUrl" style="max-height: 150px;" class="img-thumbnail" />
+                </div>
+            }
+
             <div class="form-group mb-3">
-                <label asp-for="ImageURL" class="control-label"></label>
-                <input asp-for="ImageURL" class="form-control" />
-                <span asp-validation-for="ImageURL" class="text-danger"></span>
+                <label asp-for="ImageFile" class="control-label">Change Image (optional)</label>
+                <input asp-for="ImageFile" type="file" class="form-control" accept="image/*" />
+                <span asp-validation-for="ImageFile" class="text-danger"></span>
+                <small class="form-text text-muted">Upload a new image to replace the current one.</small>
             </div>
 
             <div class="form-group">
@@ -42,16 +52,6 @@
                 <a asp-action="Index" class="btn btn-secondary">Back to List</a>
             </div>
         </form>
-    </div>
-    <div class="col-md-6">
-        <div class="card">
-            <div class="card-header">
-                <strong>Current Image</strong>
-            </div>
-            <div class="card-body text-center">
-                <img src="@Model.ImageURL" class="img-fluid rounded" style="max-height: 200px;" onerror="this.src='https://picsum.photos/id/0/300/200'" />
-            </div>
-        </div>
     </div>
 </div>
 

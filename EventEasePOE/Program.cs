@@ -1,4 +1,5 @@
 using EventEase.Data;
+using EventEase.Services;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.SqlServer; // Add this using directive
 
@@ -11,6 +12,9 @@ builder.Services.AddControllersWithViews();
 // Register DbContext with SQL Server
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+
+builder.Services.AddScoped<IBlobService, BlobService>();
+builder.Services.AddScoped<IBlobService, AzureBlobService>();
 
 var app = builder.Build();
 

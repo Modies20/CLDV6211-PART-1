@@ -9,13 +9,13 @@ namespace EventEase.Models
         public int VenueId { get; set; }
 
         [Required(ErrorMessage = "Venue name is required")]
-        [Display(Name = "Venue Name")]
         [StringLength(255)]
+        [Display(Name = "Venue Name")]
         public string VenueName { get; set; } = string.Empty;
 
-        [Required(ErrorMessage = "Venue location is required")]
-        [Display(Name = "Location")]
+        [Required(ErrorMessage = "Location is required")]
         [StringLength(255)]
+        [Display(Name = "Location")]
         public string VenueLocation { get; set; } = string.Empty;
 
         [Required(ErrorMessage = "Capacity is required")]
@@ -23,13 +23,15 @@ namespace EventEase.Models
         [Display(Name = "Maximum Capacity")]
         public int Capacity { get; set; }
 
-        [Display(Name = "Venue Image")]
-        [StringLength(500)]
-        public string? ImageURL { get; set; }
+        // Now we store the blob URL instead of a manual URL string
+        [Display(Name = "Image URL")]
+        public string ImageURL { get; set; } = string.Empty;
 
-        // Navigation property
+        // For file upload (not stored in database)
+        [NotMapped]
+        [Display(Name = "Venue Image")]
+        public IFormFile? ImageFile { get; set; }
+
         public virtual ICollection<Booking>? Bookings { get; set; }
     }
 }
-
-

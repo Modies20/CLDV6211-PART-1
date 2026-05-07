@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using EventEase.Data;
 using EventEase.Models;
+using EventEase.ViewModels;
 
 namespace EventEase.Controllers
 {
@@ -20,14 +21,42 @@ namespace EventEase.Controllers
         }
 
         // GET: Bookings
-        public async Task<IActionResult> Index()
+        public async Task<IActionResult> Index(string searchTerm)
         {
+            ViewBag.SearchTerm = searchTerm;
+
             var bookings = _context.Bookings
                 .Include(b => b.Event)
                 .Include(b => b.Venue)
-                .OrderBy(b => b.StartDateTime);
+                .Select(b => new BookingViewModel
+                {
+                    BookingId = b.BookingId,
+                    EventName = b.Event != null ? b.Event.EventName : "N/A",
+                    EventDate = b.Event != null ? b.Event.EventDate : DateTime.MinValue,
+                    VenueName = b.Venue != null ? b.Venue.VenueName : "N/A",
+                    VenueLocation = b.Venue != null ? b.Venue.VenueLocation : "N/A",
+                    VenueCapacity = b.Venue != null ? b.Venue.Capacity : 0,
+                    StartDateTime = b.StartDateTime,
+                    EndDateTime = b.EndDateTime,
+                    CustomerName = b.CustomerName,
+                    CustomerEmail = b.CustomerEmail,
+                    BookingStatus = b.BookingStatus,
+                    BookingDate = b.BookingDate
+                })
+                .AsQueryable();
 
-            return View(await bookings.ToListAsync());
+            // Apply search filter
+            if (!string.IsNullOrEmpty(searchTerm))
+            {
+                searchTerm = searchTerm.Trim();
+                bookings = bookings.Where(b =>
+                    b.BookingId.ToString().Contains(searchTerm) ||
+                    b.EventName.Contains(searchTerm) ||
+                    b.CustomerName.Contains(searchTerm));
+            }
+
+            // Order by most recent start date
+            return View(await bookings.OrderByDescending(b => b.StartDateTime).ToListAsync());
         }
 
         // GET: Bookings/Details/5
@@ -52,7 +81,7 @@ namespace EventEase.Controllers
         }
 
         // GET: Bookings/Create
-        public async Task<IActionResult> Create()
+        public IActionResult Create()
         {
             ViewData["EventId"] = new SelectList(_context.Events, "EventId", "EventName");
             ViewData["VenueId"] = new SelectList(_context.Venues, "VenueId", "VenueName");
@@ -231,18 +260,29 @@ namespace EventEase.Controllers
             return RedirectToAction(nameof(Index));
         }
 
-        // GET: Bookings/Calendar (Bonus view for visual overview)
+        // GET: Bookings/Calendar
         public async Task<IActionResult> Calendar()
         {
-            var bookings = await _context.Bookings
+            var allBookings = await _context.Bookings
                 .Include(b => b.Event)
                 .Include(b => b.Venue)
+                .Where(b => b.BookingStatus != "Cancelled")
+                .Select(b => new BookingViewModel
+                {
+                    BookingId = b.BookingId,
+                    EventName = b.Event != null ? b.Event.EventName : "N/A",
+                    VenueName = b.Venue != null ? b.Venue.VenueName : "N/A",
+                    StartDateTime = b.StartDateTime,
+                    EndDateTime = b.EndDateTime,
+                    CustomerName = b.CustomerName,
+                    BookingStatus = b.BookingStatus
+                })
                 .ToListAsync();
 
-            return View(bookings);
+            return View(allBookings);
         }
 
-        // GET: Bookings/MyBookings (Search by customer name)
+        // GET: Bookings/MyBookings (Search by Customer)
         public async Task<IActionResult> MyBookings(string searchName)
         {
             ViewBag.SearchName = searchName;
@@ -250,27 +290,46 @@ namespace EventEase.Controllers
             var bookings = _context.Bookings
                 .Include(b => b.Event)
                 .Include(b => b.Venue)
-                .OrderBy(b => b.StartDateTime);
+                .Select(b => new BookingViewModel
+                {
+                    BookingId = b.BookingId,
+                    EventName = b.Event != null ? b.Event.EventName : "N/A",
+                    VenueName = b.Venue != null ? b.Venue.VenueName : "N/A",
+                    StartDateTime = b.StartDateTime,
+                    EndDateTime = b.EndDateTime,
+                    CustomerName = b.CustomerName,
+                    BookingStatus = b.BookingStatus
+                })
+                .AsQueryable();
 
             if (!string.IsNullOrEmpty(searchName))
             {
-                bookings = bookings.Where(b => b.CustomerName.Contains(searchName)) as IOrderedQueryable<Booking>;
+                bookings = bookings.Where(b => b.CustomerName.Contains(searchName.Trim()));
             }
 
-            return View(await bookings.ToListAsync());
+            return View(await bookings.OrderByDescending(b => b.StartDateTime).ToListAsync());
         }
 
-        // GET: Bookings/Upcoming (Show only upcoming bookings)
+        // GET: Bookings/Upcoming
         public async Task<IActionResult> Upcoming()
         {
             var upcomingBookings = await _context.Bookings
                 .Include(b => b.Event)
                 .Include(b => b.Venue)
-                .Where(b => b.StartDateTime > DateTime.Now)
+                .Where(b => b.StartDateTime > DateTime.Now && b.BookingStatus != "Cancelled")
+                .Select(b => new BookingViewModel
+                {
+                    BookingId = b.BookingId,
+                    EventName = b.Event != null ? b.Event.EventName : "N/A",
+                    VenueName = b.Venue != null ? b.Venue.VenueName : "N/A",
+                    StartDateTime = b.StartDateTime,
+                    EndDateTime = b.EndDateTime,
+                    CustomerName = b.CustomerName,
+                    BookingStatus = b.BookingStatus
+                })
                 .OrderBy(b => b.StartDateTime)
                 .ToListAsync();
 
-            ViewBag.Count = upcomingBookings.Count;
             return View(upcomingBookings);
         }
 

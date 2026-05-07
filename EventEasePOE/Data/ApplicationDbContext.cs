@@ -46,9 +46,9 @@ namespace EventEase.Data
             );
 
             modelBuilder.Entity<Event>().HasData(
-                new Event { EventId = 1, EventName = "Annual Tech Summit", EventDate = new DateTime(2026, 5, 15), EventDescription = "Annual technology conference featuring industry leaders", ImageURL = "https://picsum.photos/id/0/400/300" },
-                new Event { EventId = 2, EventName = "Wedding Expo", EventDate = new DateTime(2026, 6, 10), EventDescription = "Showcase of wedding vendors and services", ImageURL = "https://picsum.photos/id/26/400/300" },
-                new Event { EventId = 3, EventName = "Corporate Gala", EventDate = new DateTime(2026, 7, 20), EventDescription = "Annual charity fundraising gala", ImageURL = "https://picsum.photos/id/29/400/300" }
+                new Event { EventId = 1, EventName = "Annual Tech Summit", EventDate = new DateTime(2026, 5, 15), EventDescription = "Annual technology conference featuring industry leaders", ImageUrl = "https://picsum.photos/id/0/400/300" },
+                new Event { EventId = 2, EventName = "Wedding Expo", EventDate = new DateTime(2026, 6, 10), EventDescription = "Showcase of wedding vendors and services", ImageUrl = "https://picsum.photos/id/26/400/300" },
+                new Event { EventId = 3, EventName = "Corporate Gala", EventDate = new DateTime(2026, 7, 20), EventDescription = "Annual charity fundraising gala", ImageUrl = "https://picsum.photos/id/29/400/300" }
             );
         }
     }
