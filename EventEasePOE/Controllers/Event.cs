@@ -1,4 +1,5 @@
 ﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -7,6 +8,7 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using EventEase.Data;
 using EventEase.Models;
+using Microsoft.Extensions.Logging;
 
 namespace EventEase.Controllers
 {
@@ -22,7 +24,22 @@ namespace EventEase.Controllers
         // GET: Events
         public async Task<IActionResult> Index()
         {
-            return View(await _context.Events.ToListAsync());
+            try
+            {
+                var events = await _context.Events.ToListAsync();
+                return View(events);
+            }
+            catch (Exception ex)
+            {
+                // Log the error and store details in TempData for development debugging.
+                var logger = HttpContext.RequestServices.GetService(typeof(ILogger<EventsController>)) as ILogger<EventsController>;
+                logger?.LogError(ex, "Failed to load events for Index view.");
+
+                TempData["ErrorMessage"] = "Unable to load events. Check the application logs for details.";
+                // Store full exception details for debugging (do not expose in production)
+                TempData["ErrorDetails"] = ex.ToString();
+                return View(new List<Event>());
+            }
         }
 
         // GET: Events/Details/5

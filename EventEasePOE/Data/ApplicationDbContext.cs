@@ -1,5 +1,6 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using EventEase.Lookups;
 using EventEase.Models;
+using Microsoft.EntityFrameworkCore;
 
 namespace EventEase.Data
 {
@@ -13,6 +14,7 @@ namespace EventEase.Data
         public DbSet<Venue> Venues { get; set; }
         public DbSet<Event> Events { get; set; }
         public DbSet<Booking> Bookings { get; set; }
+        public DbSet<EventType> EventTypes { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -46,10 +48,19 @@ namespace EventEase.Data
             );
 
             modelBuilder.Entity<Event>().HasData(
-                new Event { EventId = 1, EventName = "Annual Tech Summit", EventDate = new DateTime(2026, 5, 15), EventDescription = "Annual technology conference featuring industry leaders", ImageUrl = "https://picsum.photos/id/0/400/300" },
-                new Event { EventId = 2, EventName = "Wedding Expo", EventDate = new DateTime(2026, 6, 10), EventDescription = "Showcase of wedding vendors and services", ImageUrl = "https://picsum.photos/id/26/400/300" },
-                new Event { EventId = 3, EventName = "Corporate Gala", EventDate = new DateTime(2026, 7, 20), EventDescription = "Annual charity fundraising gala", ImageUrl = "https://picsum.photos/id/29/400/300" }
+                new Event { EventId = 1, EventName = "Annual Tech Summit", EventDate = new DateTime(2026, 5, 15), EventDescription = "Annual technology conference featuring industry leaders", ImageUrl = "https://picsum.photos/id/0/400/300", EventTypeId = 1 },
+                new Event { EventId = 2, EventName = "Wedding Expo", EventDate = new DateTime(2026, 6, 10), EventDescription = "Showcase of wedding vendors and services", ImageUrl = "https://picsum.photos/id/26/400/300", EventTypeId = 1 },
+                new Event { EventId = 3, EventName = "Corporate Gala", EventDate = new DateTime(2026, 7, 20), EventDescription = "Annual charity fundraising gala", ImageUrl = "https://picsum.photos/id/29/400/300", EventTypeId = 1 }
             );
+
+            // Seed Event Types
+            modelBuilder.Entity<EventType>().HasData(
+                new EventType { EventTypeId = 1, CategoryName = "Conference", Description = "Business and tech conferences" },
+                new EventType { EventTypeId = 2, CategoryName = "Wedding", Description = "Wedding ceremonies and receptions" },
+                new EventType { EventTypeId = 3, CategoryName = "Concert", Description = "Live music performances" },
+                new EventType { EventTypeId = 4, CategoryName = "Corporate", Description = "Company meetings and galas" },
+                new EventType { EventTypeId = 5, CategoryName = "Private Party", Description = "Private celebrations and parties" }
+);
         }
     }
 }

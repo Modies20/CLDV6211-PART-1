@@ -18,4 +18,8 @@
     <PackageReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Design" Version="9.0.12" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="obj\Debug\net9.0\Microsoft.CodeAnalysis.Razor.Compiler\Microsoft.NET.Sdk.Razor.SourceGenerators.RazorSourceGenerator\" />
+  </ItemGroup>
+
 </Project>

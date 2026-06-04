@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using EventEase.Lookups;
+using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace EventEase.Models
@@ -29,5 +30,13 @@ namespace EventEase.Models
         public IFormFile? ImageFile { get; set; }
 
         public virtual ICollection<Booking>? Bookings { get; set; }
+
+        // New property
+        [Display(Name = "Event Type")]
+        public int EventTypeId { get; set; }
+
+        // Navigation property
+        [ForeignKey("EventTypeId")]
+        public virtual EventType? EventType { get; set; }
     }
 }

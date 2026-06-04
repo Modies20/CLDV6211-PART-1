@@ -1,7 +1,7 @@
-﻿@model IEnumerable<EventEase.ViewModels.BookingViewModel>
-
+@model IEnumerable<EventEase.ViewModels.BookingViewModel>?
 @{
     ViewData["Title"] = "Search Bookings by Customer";
+    var results = Model ?? Enumerable.Empty<EventEase.ViewModels.BookingViewModel>();
 }
 
 <h1><i class="bi bi-search"></i> Search Bookings by Customer</h1>
@@ -9,27 +9,23 @@
 <div class="row mb-4">
     <div class="col-md-6">
         <form asp-action="MyBookings" method="get" class="input-group">
-            <input type="text" name="searchName" class="form-control"
-                   placeholder="Enter customer name..."
-                   value="@ViewBag.SearchName" />
+            <input type="text" name="searchName" class="form-control" placeholder="Enter customer name..." value="@ViewBag.SearchName" />
             <button type="submit" class="btn btn-primary"><i class="bi bi-search"></i> Search</button>
             <a asp-action="MyBookings" class="btn btn-secondary">Clear</a>
         </form>
     </div>
 </div>
 
-@if (!string.IsNullOrEmpty(ViewBag.SearchName))
+@if (!string.IsNullOrEmpty((string?)ViewBag.SearchName))
 {
-    <p>Showing results for: <strong>@ViewBag.SearchName</strong> (@Model.Count() found)</p>
+    <p>Showing results for: <strong>@ViewBag.SearchName</strong> (@results.Count() found)</p>
 }
 
-@if (!Model.Any() && !string.IsNullOrEmpty(ViewBag.SearchName))
+@if (!results.Any())
 {
-    <div class="alert alert-warning">
-        No bookings found for "@ViewBag.SearchName"
-    </div>
+    <div class="alert alert-warning">No bookings found for "@ViewBag.SearchName"</div>
 }
-else if (Model.Any())
+else
 {
     <div class="table-responsive">
         <table class="table table-striped table-hover">
@@ -46,7 +42,7 @@ else if (Model.Any())
                 </tr>
             </thead>
             <tbody>
-                @foreach (var item in Model)
+                @foreach (var item in results)
                 {
                     <tr>
                         <td>@item.BookingId</td>

@@ -1,7 +1,8 @@
 using System;
 
-namespace EventEasePOE.ViewModels
+namespace EventEase.ViewModels
 {
+    // Shim type to satisfy old generated Razor artifacts referencing EventEase.ViewModels
     public class BookingViewModel
     {
         public int BookingId { get; set; }

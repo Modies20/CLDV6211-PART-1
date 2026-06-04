@@ -1,12 +1,15 @@
 ﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.Extensions.Logging;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using EventEase.Data;
 using EventEase.Models;
+using EventEase.Lookups;
 using EventEase.ViewModels;
 
 namespace EventEase.Controllers
@@ -15,48 +18,20 @@ namespace EventEase.Controllers
     {
         private readonly ApplicationDbContext _context;
 
+        // Using public BookingViewModel in EventEasePOE.ViewModels for views
+
         public BookingsController(ApplicationDbContext context)
         {
             _context = context;
         }
 
-        // GET: Bookings
+        // GET: Bookings (simple)
+        [NonAction]
+        // This overload is not an MVC action to avoid ambiguous route matching. It delegates to the advanced Index.
         public async Task<IActionResult> Index(string searchTerm)
         {
-            ViewBag.SearchTerm = searchTerm;
-
-            var bookings = _context.Bookings
-                .Include(b => b.Event)
-                .Include(b => b.Venue)
-                .Select(b => new BookingViewModel
-                {
-                    BookingId = b.BookingId,
-                    EventName = b.Event != null ? b.Event.EventName : "N/A",
-                    EventDate = b.Event != null ? b.Event.EventDate : DateTime.MinValue,
-                    VenueName = b.Venue != null ? b.Venue.VenueName : "N/A",
-                    VenueLocation = b.Venue != null ? b.Venue.VenueLocation : "N/A",
-                    VenueCapacity = b.Venue != null ? b.Venue.Capacity : 0,
-                    StartDateTime = b.StartDateTime,
-                    EndDateTime = b.EndDateTime,
-                    CustomerName = b.CustomerName,
-                    CustomerEmail = b.CustomerEmail,
-                    BookingStatus = b.BookingStatus,
-                    BookingDate = b.BookingDate
-                })
-                .AsQueryable();
-
-            // Apply search filter
-            if (!string.IsNullOrEmpty(searchTerm))
-            {
-                searchTerm = searchTerm.Trim();
-                bookings = bookings.Where(b =>
-                    b.BookingId.ToString().Contains(searchTerm) ||
-                    b.EventName.Contains(searchTerm) ||
-                    b.CustomerName.Contains(searchTerm));
-            }
-
-            // Order by most recent start date
-            return View(await bookings.OrderByDescending(b => b.StartDateTime).ToListAsync());
+            // Delegate to the advanced Index overload to keep a single code path
+            return await Index(searchTerm, null, null, null, null);
         }
 
         // GET: Bookings/Details/5
@@ -267,7 +242,7 @@ namespace EventEase.Controllers
                 .Include(b => b.Event)
                 .Include(b => b.Venue)
                 .Where(b => b.BookingStatus != "Cancelled")
-                .Select(b => new BookingViewModel
+                .Select(b => new EventEase.ViewModels.BookingViewModel
                 {
                     BookingId = b.BookingId,
                     EventName = b.Event != null ? b.Event.EventName : "N/A",
@@ -278,7 +253,6 @@ namespace EventEase.Controllers
                     BookingStatus = b.BookingStatus
                 })
                 .ToListAsync();
-
             return View(allBookings);
         }
 
@@ -290,7 +264,7 @@ namespace EventEase.Controllers
             var bookings = _context.Bookings
                 .Include(b => b.Event)
                 .Include(b => b.Venue)
-                .Select(b => new BookingViewModel
+                .Select(b => new EventEase.ViewModels.BookingViewModel
                 {
                     BookingId = b.BookingId,
                     EventName = b.Event != null ? b.Event.EventName : "N/A",
@@ -307,7 +281,9 @@ namespace EventEase.Controllers
                 bookings = bookings.Where(b => b.CustomerName.Contains(searchName.Trim()));
             }
 
-            return View(await bookings.OrderByDescending(b => b.StartDateTime).ToListAsync());
+            var list = await bookings.OrderByDescending(b => b.StartDateTime).ToListAsync();
+            ViewBag.SearchName = searchName;
+            return View("SearchByCustomer", list);
         }
 
         // GET: Bookings/Upcoming
@@ -317,7 +293,7 @@ namespace EventEase.Controllers
                 .Include(b => b.Event)
                 .Include(b => b.Venue)
                 .Where(b => b.StartDateTime > DateTime.Now && b.BookingStatus != "Cancelled")
-                .Select(b => new BookingViewModel
+                .Select(b => new EventEase.ViewModels.BookingViewModel
                 {
                     BookingId = b.BookingId,
                     EventName = b.Event != null ? b.Event.EventName : "N/A",
@@ -329,13 +305,92 @@ namespace EventEase.Controllers
                 })
                 .OrderBy(b => b.StartDateTime)
                 .ToListAsync();
-
             return View(upcomingBookings);
         }
 
         private bool BookingExists(int id)
         {
             return _context.Bookings.Any(e => e.BookingId == id);
+        }
+
+        public async Task<IActionResult> Index(string searchTerm, int? eventTypeId, DateTime? startDate, DateTime? endDate, bool? availableOnly)
+        {
+            ViewBag.SearchTerm = searchTerm;
+            ViewBag.EventTypeId = eventTypeId;
+            ViewBag.StartDate = startDate?.ToString("yyyy-MM-dd");
+            ViewBag.EndDate = endDate?.ToString("yyyy-MM-dd");
+            ViewBag.AvailableOnly = availableOnly ?? false;
+
+            // Populate EventType dropdown for the filter UI
+            ViewBag.EventTypeList = new SelectList(_context.EventTypes, "EventTypeId", "CategoryName", eventTypeId);
+
+            try
+            {
+                var bookingsQuery = _context.Bookings
+                    .Include(b => b.Event)
+                        .ThenInclude(e => e.EventType)
+                    .Include(b => b.Venue)
+                    .Select(b => new EventEase.ViewModels.BookingViewModel
+                    {
+                        BookingId = b.BookingId,
+                        EventName = b.Event != null ? b.Event.EventName : "N/A",
+                        EventDate = b.Event != null ? b.Event.EventDate : DateTime.MinValue,
+                        EventType = b.Event != null && b.Event.EventType != null ? b.Event.EventType.CategoryName : "Not Set",
+                        VenueName = b.Venue != null ? b.Venue.VenueName : "N/A",
+                        VenueLocation = b.Venue != null ? b.Venue.VenueLocation : "N/A",
+                        VenueCapacity = b.Venue != null ? b.Venue.Capacity : 0,
+                        StartDateTime = b.StartDateTime,
+                        EndDateTime = b.EndDateTime,
+                        CustomerName = b.CustomerName,
+                        CustomerEmail = b.CustomerEmail,
+                        BookingStatus = b.BookingStatus,
+                        BookingDate = b.BookingDate
+                    })
+                    .AsQueryable();
+
+                // Search term filter
+                if (!string.IsNullOrEmpty(searchTerm))
+                {
+                    searchTerm = searchTerm.Trim();
+                    bookingsQuery = bookingsQuery.Where(b =>
+                        b.BookingId.ToString().Contains(searchTerm) ||
+                        b.EventName.Contains(searchTerm) ||
+                        b.CustomerName.Contains(searchTerm));
+                }
+
+                // Event Type filter
+                if (eventTypeId.HasValue)
+                {
+                    var eventType = _context.EventTypes.FirstOrDefault(et => et.EventTypeId == eventTypeId.Value);
+                    if (eventType != null && !string.IsNullOrEmpty(eventType.CategoryName))
+                    {
+                        bookingsQuery = bookingsQuery.Where(b => !string.IsNullOrEmpty(b.EventType) && b.EventType!.Contains(eventType.CategoryName));
+                    }
+                }
+
+                // Date range filters
+                if (startDate.HasValue)
+                    bookingsQuery = bookingsQuery.Where(b => b.StartDateTime.Date >= startDate.Value.Date);
+                if (endDate.HasValue)
+                    bookingsQuery = bookingsQuery.Where(b => b.EndDateTime.Date <= endDate.Value.Date);
+
+                // Venue availability filter (future bookings only)
+                if (availableOnly.HasValue && availableOnly.Value)
+                    bookingsQuery = bookingsQuery.Where(b => b.StartDateTime > DateTime.Now);
+
+                var list = await bookingsQuery.OrderByDescending(b => b.StartDateTime).ToListAsync();
+                ViewBag.Bookings = list;
+                return View();
+            }
+            catch (Exception ex)
+            {
+                var logger = HttpContext.RequestServices.GetService(typeof(ILogger<BookingsController>)) as ILogger<BookingsController>;
+                logger?.LogError(ex, "Failed to load bookings for Index view.");
+                TempData["ErrorMessage"] = "Unable to load bookings. Check the logs for details.";
+                TempData["ErrorDetails"] = ex.ToString();
+                ViewBag.Bookings = new List<EventEase.ViewModels.BookingViewModel>();
+                return View();
+            }
         }
     }
 }

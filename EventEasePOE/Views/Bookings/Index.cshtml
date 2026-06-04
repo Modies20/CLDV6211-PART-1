@@ -1,31 +1,64 @@
 ﻿@model IEnumerable<EventEase.ViewModels.BookingViewModel>
 
 @{
-    ViewData["Title"] = "Bookings - Consolidated View";
+    ViewData["Title"] = "Advanced Booking Search";
+    var bookings = ViewBag.Bookings as IEnumerable<EventEase.ViewModels.BookingViewModel>;
 }
 
-<h1><i class="bi bi-calendar-check"></i> Booking Management</h1>
+<h1><i class="bi bi-funnel"></i> Advanced Booking Search</h1>
+<p class="text-muted">Filter bookings by event type, date range, and future availability.</p>
 
-<!-- Search Form -->
-<div class="row mb-4">
-    <div class="col-md-6">
-        <form asp-action="Index" method="get" class="input-group">
-            <input type="text" name="searchTerm" class="form-control"
-                   placeholder="Search by Booking ID, Event Name, Customer..."
-                   value="@ViewBag.SearchTerm" />
-            <button type="submit" class="btn btn-primary">Search</button>
-            <a asp-action="Index" class="btn btn-secondary">Clear</a>
-        </form>
+<!-- Advanced Filter Form -->
+<div class="card mb-4 shadow-sm">
+    <div class="card-header bg-primary text-white">
+        <strong><i class="bi bi-sliders"></i> Filter Options</strong>
     </div>
-    <div class="col-md-6 text-end">
-        <a asp-action="Create" class="btn btn-success">+ New Booking</a>
+    <div class="card-body">
+        <form asp-action="Index" method="get">
+            <div class="row g-3">
+                <div class="col-md-3">
+                    <label class="form-label">Search (ID/Event/Customer)</label>
+                    <input type="text" name="searchTerm" class="form-control" placeholder="e.g., 101 or Tech" value="@ViewBag.SearchTerm" />
+                </div>
+                <div class="col-md-2">
+                    <label class="form-label">Event Type</label>
+                    <select name="eventTypeId" class="form-select" asp-items="ViewBag.EventTypeList">
+                        <option value="">-- All Types --</option>
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <label class="form-label">From Date</label>
+                    <input type="date" name="startDate" class="form-control" value="@ViewBag.StartDate" />
+                </div>
+                <div class="col-md-2">
+                    <label class="form-label">To Date</label>
+                    <input type="date" name="endDate" class="form-control" value="@ViewBag.EndDate" />
+                </div>
+                <div class="col-md-2">
+                    <label class="form-label d-block">&nbsp;</label>
+                    <div class="form-check">
+                        <input type="checkbox" class="form-check-input" name="availableOnly" value="true" id="availableOnly" @(ViewBag.AvailableOnly ? "checked" : "") />
+                        <label class="form-check-label" for="availableOnly">Future bookings only</label>
+                    </div>
+                </div>
+                <div class="col-md-1">
+                    <label class="form-label d-block">&nbsp;</label>
+                    <button type="submit" class="btn btn-success w-100"><i class="bi bi-search"></i> Filter</button>
+                </div>
+            </div>
+        </form>
     </div>
 </div>
 
-@if (!Model.Any())
+<div class="d-flex justify-content-between mb-3">
+    <a asp-action="Create" class="btn btn-primary"><i class="bi bi-plus-circle"></i> Create New Booking</a>
+    <a asp-action="Index" class="btn btn-secondary"><i class="bi bi-arrow-repeat"></i> Clear Filters</a>
+</div>
+
+@if (bookings == null || !bookings.Any())
 {
-    <div class="alert alert-info">
-        No bookings found @(!string.IsNullOrEmpty(ViewBag.SearchTerm) ? $"matching '{ViewBag.SearchTerm}'" : "").
+    <div class="alert alert-info text-center">
+        <i class="bi bi-info-circle"></i> No bookings found matching your criteria.
     </div>
 }
 else
@@ -35,7 +68,8 @@ else
             <thead class="table-dark">
                 <tr>
                     <th>Booking ID</th>
-                    <th>Event Name</th>
+                    <th>Event</th>
+                    <th>Event Type</th>
                     <th>Event Date</th>
                     <th>Venue</th>
                     <th>Location</th>
@@ -48,35 +82,32 @@ else
                 </tr>
             </thead>
             <tbody>
-                @foreach (var item in Model)
+                @foreach (var item in bookings)
                 {
                     var isPast = item.StartDateTime < DateTime.Now;
                     <tr class="@(isPast ? "table-secondary" : "")">
                         <td>@item.BookingId</td>
-                        <td>@item.EventName</td>
+                        <td>@(item.EventName ?? "N/A")</td>
+                        <td>@(item.EventType ?? "Not Set")</td>
                         <td>@item.EventDate.ToString("yyyy-MM-dd")</td>
-                        <td>@item.VenueName</td>
-                        <td>@item.VenueLocation</td>
+                        <td>@(item.VenueName ?? "N/A")</td>
+                        <td>@(item.VenueLocation ?? "N/A")</td>
                         <td>@item.VenueCapacity</td>
                         <td>@item.StartDateTime.ToString("yyyy-MM-dd HH:mm")</td>
                         <td>@item.EndDateTime.ToString("yyyy-MM-dd HH:mm")</td>
-                        <td>@item.CustomerName</td>
+                        <td>@(item.CustomerName ?? "N/A")</td>
                         <td>
-                            @if (item.BookingStatus == "Confirmed")
+                            @if (string.Equals((string?)item.BookingStatus, "Confirmed", StringComparison.OrdinalIgnoreCase))
                             {
                                 <span class="badge bg-success">Confirmed</span>
                             }
-                            else if (item.BookingStatus == "Cancelled")
+                            else if (string.Equals((string?)item.BookingStatus, "Cancelled", StringComparison.OrdinalIgnoreCase))
                             {
                                 <span class="badge bg-danger">Cancelled</span>
                             }
-                            else if (item.BookingStatus == "Completed")
-                            {
-                                <span class="badge bg-secondary">Completed</span>
-                            }
                             else
                             {
-                                <span class="badge bg-warning">@item.BookingStatus</span>
+                                <span class="badge bg-warning">@(!string.IsNullOrEmpty((string?)item.BookingStatus) ? (string)item.BookingStatus : "Pending")</span>
                             }
                         </td>
                         <td>

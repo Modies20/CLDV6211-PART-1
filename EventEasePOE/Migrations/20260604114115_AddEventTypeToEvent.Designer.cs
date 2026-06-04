@@ -4,6 +4,7 @@ using EventEase.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace EventEasePOE.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260604114115_AddEventTypeToEvent")]
+    partial class AddEventTypeToEvent
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -163,7 +166,7 @@ namespace EventEasePOE.Migrations
                             EventDate = new DateTime(2026, 5, 15, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             EventDescription = "Annual technology conference featuring industry leaders",
                             EventName = "Annual Tech Summit",
-                            EventTypeId = 1,
+                            EventTypeId = 0,
                             ImageUrl = "https://picsum.photos/id/0/400/300"
                         },
                         new
@@ -172,7 +175,7 @@ namespace EventEasePOE.Migrations
                             EventDate = new DateTime(2026, 6, 10, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             EventDescription = "Showcase of wedding vendors and services",
                             EventName = "Wedding Expo",
-                            EventTypeId = 1,
+                            EventTypeId = 0,
                             ImageUrl = "https://picsum.photos/id/26/400/300"
                         },
                         new
@@ -181,7 +184,7 @@ namespace EventEasePOE.Migrations
                             EventDate = new DateTime(2026, 7, 20, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             EventDescription = "Annual charity fundraising gala",
                             EventName = "Corporate Gala",
-                            EventTypeId = 1,
+                            EventTypeId = 0,
                             ImageUrl = "https://picsum.photos/id/29/400/300"
                         });
                 });

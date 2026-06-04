@@ -34,11 +34,24 @@ app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Home}/{action=Index}/{id?}");
 
-// Ensure database is created and migrations applied
+// Apply EF Core migrations at startup (safer when using migrations)
 using (var scope = app.Services.CreateScope())
 {
     var dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
-    dbContext.Database.EnsureCreated();
+    try
+    {
+        dbContext.Database.Migrate();
+    }
+    catch (Exception ex)
+    {
+        // Log the migration failure but do not rethrow so the app can start in development.
+        // In production you should fail loudly and investigate the underlying issue.
+        var logger = scope.ServiceProvider.GetRequiredService<ILogger<Program>>();
+        logger.LogError(ex, "Database migration failed on startup. Application will continue running, but DB may be out of sync.");
+        Console.Error.WriteLine(ex);
+        // Optionally, you could fallback to EnsureCreated in development environments only.
+        // dbContext.Database.EnsureCreated();
+    }
 }
 
 app.Run();
